@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>后视镜后台管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="/myjs/jquery.min.js"></script>
+</head>
+<body class="layui-layout-body">
+<!--判断是否是父级页面，用于iframe里面的跳转到登陆页面后是的该页面跳转-->
+<input type="hidden" id="is_top">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo layui-anim-rotate layui-anim-scale">后视镜后台管理</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <!--<ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">控制台</a></li>
+            <li class="layui-nav-item"><a href="">商品管理</a></li>
+            <li class="layui-nav-item"><a href="">用户</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">邮件管理</a></dd>
+                    <dd><a href="">消息管理</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+        </ul>-->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    {% if admin.Face %}
+                        <img src="{{ admin.Face }}" class="layui-nav-img">
+                    {% else %}
+                        <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    {% endif %}
+                    {{ admin.Nickname }}
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="/admin/edit_admin" target="iframe" style="color: #333">修改资料</a></dd>
+                    <dd><a href="/admin/edit_pass"  target="iframe" style="color: #333">修改密码</a></dd>
+                </dl>
+            </li>
+            <li  class="layui-nav-item">
+                <a href="javascript:;"  id="quit" style="color: #bebec1">退出登陆</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black" style="background-color: #24262e;">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+                {% for column in columns%}
+                <li class="layui-nav-item">
+                    <a class="" href="javascript:;" style="font-size: 17px;">{{ column.Name }}</a>
+
+                    <dl class="layui-nav-child">
+                        {% for c in column.SonPower %}
+                        <dd><a href="{{ c.Action }}" target="iframe">{{ c.Name }}</a></dd>
+                        {% endfor %}
+                    </dl>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <iframe style="width: 100%;height:100%" name="iframe">
+
+        </iframe>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+
+    </div>
+</div>
+<script src="/layui/layui.js"></script>
+<script>
+    var layer;
+    //JavaScript代码区域
+    layui.use(['element','layer'], function(){
+        var element = layui.element;
+        layer = layui.layer;
+    });
+
+    $("#quit").click(function () {
+        layer.confirm('确定要退出登陆吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            //请求后台退出登陆
+            $.ajax({
+                url:"/admin/quit",
+                type:"post",
+                dataType:"json",
+                success:function (json) {
+                    if(json.code==200){
+                        layer.msg(json.data, {
+                            time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                        }, function(){
+                            window.location.href="/admin/login"
+                        });
+                    }else{
+                        layer.msg(json.data)
+                    }
+                },
+                error:function () {
+                    layer.msg("退出失败")
+                }
+            })
+        }, function(){
+
+        });
+    })
+
+</script>
+</body>
+</html>
